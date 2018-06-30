@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Ali Jeopardy</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="jeopardy.css" />
+</head>
+
+<body>
+<div id="mainArea" class="full-screen">
+	<div class="vertical-middle">
+		<h1>JEOPARDY!</h1> 
+		<div class="horizontal-middle">
+			<button id="btnLaunchJeopardy" class="btn btn-info">Jeopardy</button>
+			<button id="btnLaunchDoubleJeopardy" class="btn btn-info">Double Jeopardy</button>
+			<button id="btnLaunchFinalJeopardy" class="btn btn-info">Final Jeopardy</button>
+		</div>
+	</div>
+</div>
+<div id="jeopardyArea" class="hide">
+	<div class="category-section hide">
+		<div class="category-text">
+		
+		</div>
+	</div>
+	<button class="btn btn-info categories-button" data-round="1">Show Categories</button>
+	<button class="btn btn-info exit-button">Exit</button>
+	<div class="board">
+		<table class="board">
+		
+		</table>
+	</div>
+</div>
+
+<div id="doubleJeopardyArea" class="hide">
+	<div class="category-section hide">
+		<div class="category-text">
+		
+		</div>
+	</div>
+    <button class="btn btn-info categories-button" data-round="2">Show Categories</button>
+    <button class="btn btn-info exit-button">Exit</button>
+    <div class="board">
+        <table class="board">
+            
+        </table>
+    </div>
+</div>
+
+<div id="finalJeopardyArea" class="hide">
+	<div class="vertical-middle">
+		<div id="finalCategory" class="horizontal-middle">
+		
+		</div>
+		
+		<div id="finalAnswer" class="horizontal-middle hide">
+		
+		</div>
+	</div>
+</div>
+
+<div id="answer" class="hide">
+	<div class="vertical-middle">
+		<div id="answerText" class="horizontal-middle">
+		
+		</div>
+	</div>
+</div>
+
+<script src="jeopardy.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script>
+	var JeopardyRound = "JEOPARDYROUND";
+	var DoubleJeopardyRound = "DOUBLEJEOPARDYROUND";
+	
+    $(document).ready(function () {
+        LoadJeopardyRound(JeopardyRound, "jeopardyArea", 200);
+        LoadJeopardyRound(DoubleJeopardyRound, "doubleJeopardyArea", 400);
+		
+		$("#btnLaunchJeopardy").click(function() {
+			$("#jeopardyArea").removeClass("hide");
+			$("#mainArea").addClass("hide");
+		});
+		
+		$("#btnLaunchDoubleJeopardy").click(function() {
+			$("#doubleJeopardyArea").removeClass("hide");
+			$("#mainArea").addClass("hide");
+		});
+	
+		$(".categories-button").on("click", function() {
+			if ($(this).attr("data-round") == "1"){
+				$("#jeopardyArea .category-section").removeClass("hide");
+				StartCategoryDisplay(JeopardyRound);
+				$("#jeopardyArea .board").addClass("hide");
+			}
+			else {
+				$("#doubleJeopardyArea .category-section").removeClass("hide");
+				StartCategoryDisplay(DoubleJeopardyRound);
+				$("#doubleJeopardyArea .board").addClass("hide");
+			}
+		});
+		
+		$(".exit-button").on("click", function() {
+			$("#jeopardyArea").addClass("hide");
+			$("#doubleJeopardyArea").addClass("hide");
+			$("#mainArea").removeClass("hide");
+		});
+		
+		$("#btnLaunchFinalJeopardy").click(function() {
+			$("#finalJeopardyArea").removeClass("hide");
+			$("#mainArea").addClass("hide");
+			$("#finalCategory").text(finalJeopardyCategory);
+			$("#finalAnswer").text(finalJeopardyAnswer);
+			$("#finalCategory").unbind();
+			$("#finalCategory").on("click", function() {
+				$("#finalCategory").addClass("hide");
+				$("#finalAnswer").removeClass("hide");
+				$("#finalAnswer").unbind();
+				$("#finalAnswer").on("click", function() {
+					$("#finalAnswer").addClass("hide");
+					$("#finalCategory").removeClass("hide");
+					$("#mainArea").removeClass("hide");
+					$("#finalJeopardyArea").addClass("hide");
+				});
+			});
+		});
+    });
+	
+	function StartCategoryDisplay(jeopardyRound) {
+		var categoryIndex = 0;
+		var clues = (jeopardyRound === JeopardyRound) ? jeopardyRoundClues : doubleJeopardyRoundClues;
+		
+		SetCategory(jeopardyRound, categoryIndex);
+		
+		// start movement
+		StartCategoryAnimation(jeopardyRound, categoryIndex, function() { AnimationFinished(jeopardyRound, categoryIndex, clues.length)});
+	}
+	
+	function AnimationFinished(jeopardyRound, categoryIndex, categoryLength) {
+		categoryIndex++;
+			if (categoryIndex >= categoryLength){
+				BackToBoard(jeopardyRound);
+			}
+			else {
+				SetCategory(jeopardyRound, categoryIndex);
+				StartCategoryAnimation(jeopardyRound, categoryIndex, function() { AnimationFinished(jeopardyRound, categoryIndex, categoryLength)});
+			}
+	}
+	
+	function BackToBoard(jeopardyRound) {
+		if (jeopardyRound === JeopardyRound) {
+			$("#jeopardyArea .category-section").addClass("hide");
+			$("#jeopardyArea .board").removeClass("hide");
+		}
+		else {
+			$("#doubleJeopardyArea .category-section").addClass("hide");
+			$("#doubleJeopardyArea .board").removeClass("hide");
+		}
+	}
+	
+    function LoadJeopardyRound(jeopardyRound, container, dollarIncrement) {
+		var dailyDoubles = [];
+		if (jeopardyRound === JeopardyRound) {
+			var square = {
+				X: Math.floor(Math.random() * 2) + 3,
+				Y: Math.floor(Math.random() * 5) + 1,
+			}
+			dailyDoubles.push(square);
+		}
+		else {
+			var prevSquare = null;
+			var square = null;
+			for (var index = 0; index < 2; index++) {
+				while (square == null || (prevSquare != null && prevSquare.X == square.X && prevSquare.Y == square.Y)) {
+					square = {
+						X: Math.floor(Math.random() * 2) + 3,
+						Y: Math.floor(Math.random() * 5) + 1,
+					};
+				}
+				prevSquare = square;
+				dailyDoubles.push(square);
+			}
+		}
+		
+		var clues = (jeopardyRound === JeopardyRound) ? jeopardyRoundClues : doubleJeopardyRoundClues;
+		var $boardContainer = $("#" + container + " table.board");
+		var $categoryContainer = $("#" + container + " .category-section");
+		var clueAmount = 0;
+		var html = "<tr>";
+        for (var categoryIndex = 0; categoryIndex < clues.length; categoryIndex++) {
+			html += GenerateCategoryHtml(clues[categoryIndex].Category);
+		}
+		html += "</tr>";
+		for (var clueIndex = 0; clueIndex < clues[0].Clues.length; clueIndex++) {
+			clueAmount += dollarIncrement;
+			html += "<tr>";
+			for (var categoryIndex = 0; categoryIndex < clues.length; categoryIndex++) {
+				var isDailyDouble = false;
+				for ( var index = 0; index < dailyDoubles.length; index++ ) {
+					if (dailyDoubles[index].X === clueIndex && dailyDoubles[index].Y === categoryIndex) {
+						isDailyDouble = true;
+					}
+				}
+				html += GenerateClueHtml(clueAmount, categoryIndex, clueIndex, container, jeopardyRound, isDailyDouble);
+            }
+			html += "</tr>";
+        }
+		$boardContainer.append(html);
+    }
+	
+	function ClueClick(container, clueIndex, categoryIndex, jeopardyRound, isDailyDouble) {
+		if (isDailyDouble) {
+			$("#answerText").text("Daily Double");
+			$("#answer").unbind();
+			$("#answer").on("click", function() {
+				ClueClick(container, clueIndex, categoryIndex, jeopardyRound, false);
+			});
+		}
+		else {
+			var clues = (jeopardyRound === JeopardyRound) ? jeopardyRoundClues : doubleJeopardyRoundClues;
+			$("#answerText").text(clues[categoryIndex].Clues[clueIndex]);
+			$("#answer").unbind();
+			$("#answer").on("click", function() {
+				CloseClue(container, parseInt(categoryIndex), parseInt(clueIndex));
+			});
+		}
+		
+		$("#" + container).addClass("hide");
+		$("#answer").removeClass("hide");
+	}
+	
+	function GenerateCategoryHtml(categoryName) {
+		return ReplaceVariable("<td class='category'>{{CategoryName}}</td>", "CategoryName", categoryName);
+	}
+
+	function GenerateCategorySectionHtml(categoryName) {
+		return ReplaceVariable("<div class='vertical-middle'><div class='categoryDisplay horizontal-middle'>{{CategoryName}}</div></div>", "CategoryName", categoryName);
+	}
+	
+	function GenerateClueHtml(clueAmount, categoryIndex, clueIndex, container, jeopardyRound, isDailyDouble) {
+		var html = null;
+		if (isDailyDouble) {
+			html = ReplaceVariable("<td class='clue' data-dailyDouble='true' data-clue='{{ClueIndex}}'data-category='{{CategoryIndex}}' {{onclick}}>${{ClueAmount}}</td>", "ClueAmount", clueAmount);
+		}
+		else {
+			html = ReplaceVariable("<td class='clue' data-clue='{{ClueIndex}}'data-category='{{CategoryIndex}}' {{onclick}}>${{ClueAmount}}</td>", "ClueAmount", clueAmount);
+		}
+		html = ReplaceVariable(html, "CategoryIndex", categoryIndex);
+		html = ReplaceVariable(html, "ClueIndex", clueIndex);
+		html = ReplaceVariable(html, "onclick", "onclick='ClueClick(\"" + container + "\"," + clueIndex + "," + categoryIndex + ",\"" + jeopardyRound + "\", " + isDailyDouble + ");'");
+		
+		return html;
+	}
+	
+	function ReplaceVariable(html, property, value) {
+		var replace = "{{" + property + "}}";
+		var regex = new RegExp(replace, "g");
+		html = html.replace(regex, value);
+		
+		return html;
+	}
+	
+	function CloseClue(container, category, clue) {
+		$("#answer").addClass("hide");
+		$("#" + container + " .board table tr:nth-child(" + parseInt(clue + 2) + ") td:nth-child(" + parseInt(category + 1) + ")").text("");
+		$("#" + container).removeClass("hide");
+	}
+	
+	function SetCategory(jeopardyRound, categoryIndex) {
+		var clues = (jeopardyRound === JeopardyRound) ? jeopardyRoundClues : doubleJeopardyRoundClues;
+		if (jeopardyRound === JeopardyRound) {
+			$("#jeopardyArea .category-section .category-text").text(clues[categoryIndex].Category);
+		}
+		else {
+			$("#doubleJeopardyArea .category-section .category-text").text(clues[categoryIndex].Category);
+		}
+	}
+	
+	function StartCategoryAnimation(jeopardyRound, categoryIndex, callback) {
+		var scrollSpeed = 100;
+		var $container = null;
+		if (jeopardyRound === JeopardyRound) {
+			$container = $("#jeopardyArea .category-text");
+		}
+		else {
+			$container = $("#doubleJeopardyArea .category-text");
+		}
+		$container.css('left', window.innerWidth);
+		
+		var newXAxis = window.innerWidth / 2 + $container.width() / 2;
+		$container.animate({"left": "-=" + newXAxis + "px"}, 
+			"slow", 
+			function() {setTimeout(function() { 
+				var offScreenX = window.innerWidth / 2 - $container.width() / 2 + $container.width();
+				$container.animate({"left": "-=" + offScreenX + "px"}, 
+					"slow", 
+					function() {
+						callback();
+					});
+			}, 1500);
+		});
+	}
+</script>
+</body>
+</html>

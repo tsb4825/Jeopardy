@@ -1,0 +1,82 @@
+  .categories-button{
+    position: absolute;
+	top: 2%;
+	left: 2%;
+  }
+  
+  .exit-button {
+	  position: absolute;
+	  left: 95%;
+	  top: 2%;
+  }
+  
+  .full-screen, #jeopardyArea, #doubleJeopardyArea, #finalJeopardArea, #answer,#finalJeopardyArea {
+	  background-color: #060CE9;
+	  color: white;
+	  height: 100vh;
+	  display: table;
+	  width: 100%;
+  }
+  
+  h1 {
+	  font: Helvetica;
+	  font-size: 120px;
+	  text-align: center;
+  }
+  
+  .vertical-middle {
+	  display: table-cell;
+	  vertical-align: middle;
+  }
+  
+  .horizontal-middle {
+	  text-align: center;
+  }
+  
+  td {
+	  border: solid black;
+	  color: white;
+	  font: Helvetica;
+	  text-align: center;
+	  height: 16vh;
+  }
+  
+  td.category {
+	  font-size: 30px;
+	  min-width: 200px;
+  }
+  
+  td.clue {
+	  font-size: 70px;
+	  color: gold;
+	  cursor: pointer;
+  }
+  
+  table {
+	  width: 100%;
+  }
+  
+  .board {
+	  width: 100%;
+	  padding: 10px;
+  }
+  
+  #answerText,#finalAnswer,#finalCategory {
+	  font-size: 60px;
+	  color: white;
+  }
+  
+  .category-text {
+	 font-size: 100px;
+	 position: absolute;
+	 top: 35%;
+	 display: inline-table;
+  }
+  
+  body {
+	  overflow: hidden;
+  }
+  
+  #answer {
+	  cursor: pointer;
+  }
